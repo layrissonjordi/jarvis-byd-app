@@ -1,6 +1,6 @@
 /* Service worker mínimo: deixa o app abrir offline (casca do app).
    A telemetria em si vem ao vivo pelo MQTT, não é cacheada. */
-const CACHE = "jarvisbyd-v1";
+const CACHE = "jarvisbyd-v2";
 const ASSETS = ["./", "index.html", "app.js", "manifest.webmanifest", "icon.svg"];
 
 self.addEventListener("install", (e) => {

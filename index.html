@@ -26,6 +26,15 @@
     .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:13px; background:#0b1222; color:var(--ink); }
     .pill.alert { background:#3a1d1d; color:#ff8a80; }
     .muted { color:var(--muted); }
+    .trips { list-style:none; margin:10px 0 0; padding:0; display:grid; gap:8px; }
+    .trips li { display:flex; justify-content:space-between; gap:10px; font-size:14px; padding:8px 0; border-top:1px solid #243049; }
+    .trips li:first-child { border-top:0; }
+    .trips .km { font-weight:700; } .trips .eff { color:var(--muted); font-variant-numeric:tabular-nums; }
+    #toasts { position:fixed; left:0; right:0; bottom:calc(16px + env(safe-area-inset-bottom,0px)); display:grid; gap:8px; padding:0 16px; z-index:20; pointer-events:none; }
+    .toast { background:var(--accent); color:#fff; border-radius:12px; padding:12px 14px; font-size:14px; box-shadow:0 6px 24px rgba(0,0,0,.35); animation:up .3s ease; }
+    .toast.alert { background:#c0392b; }
+    @keyframes up { from { transform:translateY(12px); opacity:0; } }
+    @media (prefers-reduced-motion:reduce) { .toast { animation:none; } }
     form { background:var(--card); border-radius:16px; padding:16px; display:grid; gap:10px; }
     input { background:#0b1222; border:1px solid #243049; color:var(--ink); border-radius:10px; padding:11px 12px; font-size:15px; }
     button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:12px; font-size:15px; font-weight:600; }
@@ -60,6 +69,10 @@
           <div class="value" style="font-size:20px"><span class="pill" id="portas">—</span></div>
           <div class="sub">Janelas: <span id="janelas">—</span></div>
         </div>
+        <div class="card wide">
+          <div class="label">Viagens recentes</div>
+          <ul id="viagens" class="trips"><li class="muted" id="semViagens">Nenhuma viagem ainda.</li></ul>
+        </div>
       </div>
       <footer>Atualizado <span id="quando">—</span> · <a href="#" id="trocar" class="muted">trocar carro</a></footer>
     </section>
@@ -77,6 +90,7 @@
     </form>
   </main>
 
+  <div id="toasts" aria-live="polite"></div>
   <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
   <script src="app.js"></script>
 </body>

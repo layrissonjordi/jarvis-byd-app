@@ -39,7 +39,35 @@
     return `wss://${host}:${port}/mqtt`;   // HiveMQ Cloud: WebSocket seguro em /mqtt
   }
 
-  const logic = { parseTelemetry, viewModel, wsUrl };
+  function parseTrip(payload) {
+    const t = typeof payload === "string" ? JSON.parse(payload) : payload;
+    return {
+      distanciaKm: t.distancia_km ?? 0,
+      consumoKwh100: t.consumo_kwh_100 ?? 0,
+      consumoKwh: t.consumo_kwh ?? 0,
+      bateriaInicio: t.bateria_inicio ?? null,
+      bateriaFim: t.bateria_fim ?? null,
+      duracaoS: t.duracao_s ?? 0,
+      fimTs: t.fim_ts ?? 0,
+    };
+  }
+
+  function tripView(t) {
+    const bat = t.bateriaInicio == null ? "" : `${t.bateriaInicio}%→${t.bateriaFim}%`;
+    return {
+      km: `${t.distanciaKm} km`,
+      ef: `${t.consumoKwh100} kWh/100km`,
+      bat,
+      min: Math.round(t.duracaoS / 60) + " min",
+    };
+  }
+
+  function alertText(payload) {
+    const a = typeof payload === "string" ? JSON.parse(payload) : payload;
+    return a.texto || a.tipo || "Alerta";
+  }
+
+  const logic = { parseTelemetry, viewModel, wsUrl, parseTrip, tripView, alertText };
 
   // Em Node (testes): exporta e para. No navegador: segue para a UI.
   if (typeof module !== "undefined" && module.exports) { module.exports = logic; return; }
@@ -52,6 +80,32 @@
   function setStatus(state, text) {
     $("dot").className = "dot " + (state || "");
     $("statusText").textContent = text;
+  }
+
+  const trips = [];
+  function addTrip(t) {
+    trips.unshift(t);
+    if (trips.length > 10) trips.pop();
+    const ul = $("viagens");
+    ul.innerHTML = "";
+    for (const tr of trips) {
+      const v = tripView(tr);
+      const li = document.createElement("li");
+      const left = document.createElement("span");
+      left.className = "km"; left.textContent = v.km;
+      const right = document.createElement("span");
+      right.className = "eff"; right.textContent = `${v.ef} · ${v.bat}`;
+      li.append(left, right);
+      ul.appendChild(li);
+    }
+  }
+
+  function toast(text, isAlert) {
+    const el = document.createElement("div");
+    el.className = "toast" + (isAlert ? " alert" : "");
+    el.textContent = text;
+    $("toasts").appendChild(el);
+    setTimeout(() => el.remove(), 5000);
   }
 
   function render(t) {
@@ -78,17 +132,24 @@
     });
     client.on("connect", () => {
       setStatus("online", "conectado");
-      client.subscribe([base + "/telemetria", base + "/status"], { qos: 1 });
+      client.subscribe([base + "/telemetria", base + "/status", base + "/viagem", base + "/alerta"], { qos: 1 });
       $("setup").classList.add("hidden");
       $("dash").classList.remove("hidden");
     });
     client.on("message", (topic, buf) => {
-      if (topic.endsWith("/status")) {
-        const on = buf.toString() === "online";
-        setStatus(on ? "online" : "offline", on ? "carro online" : "carro offline");
-      } else if (topic.endsWith("/telemetria")) {
-        try { render(parseTelemetry(buf.toString())); } catch (e) { console.error(e); }
-      }
+      const s = buf.toString();
+      try {
+        if (topic.endsWith("/status")) {
+          const on = s === "online";
+          setStatus(on ? "online" : "offline", on ? "carro online" : "carro offline");
+        } else if (topic.endsWith("/telemetria")) {
+          render(parseTelemetry(s));
+        } else if (topic.endsWith("/viagem")) {
+          addTrip(parseTrip(s));
+        } else if (topic.endsWith("/alerta")) {
+          toast(alertText(s), true);
+        }
+      } catch (e) { console.error(e); }
     });
     client.on("error", (e) => setStatus("offline", "erro: " + e.message));
     client.on("reconnect", () => setStatus("", "reconectando…"));
