@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <title>Jarvis BYD</title>
+  <style>
+    :root { --bg:#0b0f1a; --card:#161c2e; --ink:#e8ecf6; --muted:#8a93ab; --ok:#2ecc71; --warn:#e67e22; --accent:#1e88e5; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; }
+    header h1 { font-size:18px; margin:0; letter-spacing:.5px; }
+    .dot { width:10px; height:10px; border-radius:50%; background:var(--muted); display:inline-block; margin-right:6px; }
+    .dot.online { background:var(--ok); } .dot.offline { background:var(--warn); }
+    main { padding: 0 14px 28px; max-width: 560px; margin: 0 auto; }
+    .grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .card { background:var(--card); border-radius:16px; padding:16px; }
+    .card .label { color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.6px; }
+    .card .value { font-size:28px; font-weight:700; margin-top:6px; }
+    .card .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+    .wide { grid-column: 1 / -1; }
+    .bar { height:10px; border-radius:6px; background:#0b1222; overflow:hidden; margin-top:10px; }
+    .bar > i { display:block; height:100%; background:linear-gradient(90deg,#2ecc71,#1e88e5); width:0; transition:width .4s; }
+    .pill { display:inline-block; padding:4px 10px; border-radius:999px; font-size:13px; background:#0b1222; color:var(--ink); }
+    .pill.alert { background:#3a1d1d; color:#ff8a80; }
+    .muted { color:var(--muted); }
+    form { background:var(--card); border-radius:16px; padding:16px; display:grid; gap:10px; }
+    input { background:#0b1222; border:1px solid #243049; color:var(--ink); border-radius:10px; padding:11px 12px; font-size:15px; }
+    button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:12px; font-size:15px; font-weight:600; }
+    button.ghost { background:transparent; color:var(--muted); }
+    .hidden { display:none; }
+    footer { text-align:center; color:var(--muted); font-size:12px; margin-top:18px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🚗 Jarvis BYD</h1>
+    <span id="status"><span class="dot" id="dot"></span><span id="statusText" class="muted">desconectado</span></span>
+  </header>
+
+  <main>
+    <!-- Painel -->
+    <section id="dash" class="hidden">
+      <div class="grid">
+        <div class="card wide">
+          <div class="label">Bateria</div>
+          <div class="value"><span id="bateria">—</span><span class="muted" style="font-size:18px">%</span></div>
+          <div class="sub"><span id="carregando"></span><span id="autonomia">—</span> km de autonomia</div>
+          <div class="bar"><i id="batBar"></i></div>
+        </div>
+        <div class="card">
+          <div class="label">Climatização</div>
+          <div class="value" id="arVal">—</div>
+          <div class="sub"><span id="temp">—</span></div>
+        </div>
+        <div class="card">
+          <div class="label">Portas</div>
+          <div class="value" style="font-size:20px"><span class="pill" id="portas">—</span></div>
+          <div class="sub">Janelas: <span id="janelas">—</span></div>
+        </div>
+      </div>
+      <footer>Atualizado <span id="quando">—</span> · <a href="#" id="trocar" class="muted">trocar carro</a></footer>
+    </section>
+
+    <!-- Pareamento / configuração do broker -->
+    <form id="setup">
+      <p class="muted" style="margin:0 0 4px">Conecte ao seu carro (dados do broker MQTT — ver README).</p>
+      <input id="host" placeholder="host (ex.: abc.s1.eu.hivemq.cloud)" autocomplete="off" />
+      <input id="port" placeholder="porta WebSocket (8884)" value="8884" inputmode="numeric" />
+      <input id="user" placeholder="usuário" autocomplete="off" />
+      <input id="pass" type="password" placeholder="senha" autocomplete="off" />
+      <input id="car" placeholder="id do carro (ex.: demo)" value="demo" autocomplete="off" />
+      <button type="submit">Conectar</button>
+      <button type="button" class="ghost" id="limpar">Esquecer dados salvos</button>
+    </form>
+  </main>
+
+  <script src="https://unpkg.com/mqtt@5.10.1/dist/mqtt.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
