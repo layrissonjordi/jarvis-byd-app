@@ -7,22 +7,22 @@ celular e pode ser "instalada" na tela inicial, sem loja de apps.
 Lê a telemetria por **MQTT sobre WebSocket seguro (wss)**. O app do carro (ou o
 demo do PC) publica; este app assina e mostra.
 
-## 1. Criar um broker grátis (HiveMQ Cloud)
+## 1. Criar um broker grátis (EMQX Serverless)
 
-O "ponto de encontro" entre o carro e o celular. Grátis até 100 conexões.
+O "ponto de encontro" entre o carro e o celular. (O HiveMQ Serverless grátis fecha em 31/12/2026 e não aceita clusters novos.)
 
-1. Crie uma conta em **console.hivemq.cloud** e crie um **cluster** (plano Free).
-2. Em **Access Management → Credentials**, crie um usuário e senha.
-3. Anote do painel do cluster:
-   - **Host** (algo como `abc123.s1.eu.hivemq.cloud`)
-   - Porta **8883** (TLS, usada pelo carro/demo) e **8884** (WebSocket, usada por este app).
+1. Crie uma conta em **cloud-intl.emqx.com/console**, **New Deployment → Serverless**, com **Spend Limit 0**.
+2. Em **Access Control → Authentication → + Add**, crie um usuário e senha.
+3. Anote da página **Overview**:
+   - **Host** (algo como `abc123.ala.us-east-1.emqxsl.com`)
+   - Porta **8883** (TLS, usada pelo carro/demo) e **8084** (WebSocket, usada por este app).
 
 ## 2. Publicar a telemetria (demo do PC, para testar sem o carro)
 
 No `demo/config.json`, preencha o bloco `mqtt`:
 
 ```json
-"mqtt": { "host": "abc123.s1.eu.hivemq.cloud", "port": 8883,
+"mqtt": { "host": "abc123.ala.us-east-1.emqxsl.com", "port": 8883,
           "user": "SEU_USUARIO", "pass": "SUA_SENHA", "car_id": "demo" }
 ```
 
@@ -35,7 +35,7 @@ Opções fáceis:
 - **GitHub Pages / Netlify / Cloudflare Pages:** suba a pasta `companion/`.
 - Teste rápido no PC: `npx serve companion` e abra pelo navegador (local funciona em http).
 
-Na tela inicial do app, informe **host**, **porta 8884**, **usuário**, **senha** e o
+Na tela inicial do app, informe **endereço** (a porta é automática), **usuário**, **senha** e o
 **car_id** (`demo`). Ele conecta e mostra o painel. Os dados ficam salvos no celular.
 
 > Dica: dá pra pré-preencher tudo com um **QR Code** de pareamento (o app do carro

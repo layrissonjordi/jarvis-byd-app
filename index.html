@@ -40,6 +40,13 @@
     button { background:var(--accent); color:#fff; border:0; border-radius:10px; padding:12px; font-size:15px; font-weight:600; }
     button.ghost { background:transparent; color:var(--muted); }
     .hidden { display:none; }
+    .cam-head { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+    .cam-head select { background:#0b1222; border:1px solid #243049; color:var(--ink); border-radius:10px; padding:8px 10px; font-size:14px; }
+    .live { color:#ff5252; font-size:13px; font-weight:600; }
+    #camVideo { width:100%; aspect-ratio:16/9; background:#000; border-radius:12px; margin-top:10px; object-fit:contain; }
+    .cam-btns { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
+    button:disabled { opacity:.45; }
+    .clima { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px; }
     footer { text-align:center; color:var(--muted); font-size:12px; margin-top:18px; }
   </style>
 </head>
@@ -62,12 +69,41 @@
         <div class="card">
           <div class="label">Climatização</div>
           <div class="value" id="arVal">—</div>
-          <div class="sub"><span id="temp">—</span></div>
+          <div class="sub"><span id="temp">—</span> · vento <span id="vent">—</span></div>
+        </div>
+        <div class="card">
+          <div class="label">Lá fora</div>
+          <div class="value" id="fora">—</div>
+          <div class="sub" id="odometro"></div>
+        </div>
+        <div class="card wide">
+          <div class="label">Controlar o ar</div>
+          <div class="clima">
+            <button type="button" id="arBotao" data-clima="ar" disabled>Ligar ar</button>
+            <button type="button" data-clima="desemb" disabled>Desembaçar</button>
+            <button type="button" data-clima="temp-" disabled aria-label="Menos temperatura">− 1 °C</button>
+            <button type="button" data-clima="temp+" disabled aria-label="Mais temperatura">+ 1 °C</button>
+            <button type="button" data-clima="vent-" disabled aria-label="Menos vento">− vento</button>
+            <button type="button" data-clima="vent+" disabled aria-label="Mais vento">+ vento</button>
+          </div>
+          <div class="sub" id="climaStatus" aria-live="polite"></div>
         </div>
         <div class="card">
           <div class="label">Portas</div>
           <div class="value" style="font-size:20px"><span class="pill" id="portas">—</span></div>
           <div class="sub">Janelas: <span id="janelas">—</span></div>
+        </div>
+        <div class="card wide" id="camCard">
+          <div class="cam-head">
+            <select id="camSel" aria-label="Câmera" disabled></select>
+            <span id="camLive" class="live hidden">● ao vivo</span>
+          </div>
+          <video id="camVideo" autoplay playsinline muted></video>
+          <div class="sub"><span id="camStatus">aguardando o carro</span> <span id="camInfo"></span></div>
+          <div class="cam-btns">
+            <button type="button" id="camStart" disabled>Ver ao vivo</button>
+            <button type="button" id="camStop" class="ghost" disabled>Encerrar</button>
+          </div>
         </div>
         <div class="card wide">
           <div class="label">Viagens recentes</div>
@@ -79,9 +115,9 @@
 
     <!-- Pareamento / configuração do broker -->
     <form id="setup">
-      <p class="muted" style="margin:0 0 4px">Conecte ao seu carro (dados do broker MQTT — ver README).</p>
-      <input id="host" placeholder="host (ex.: abc.s1.eu.hivemq.cloud)" autocomplete="off" />
-      <input id="port" placeholder="porta WebSocket (8884)" value="8884" inputmode="numeric" />
+      <p class="muted" style="margin:0 0 4px">Conecte ao seu carro (endereço, usuário e senha do EMQX).</p>
+      <input id="host" placeholder="endereço (ex.: abc.ala.us-east-1.emqxsl.com)" autocomplete="off" />
+      <input id="port" placeholder="porta (vazio = automática)" inputmode="numeric" />
       <input id="user" placeholder="usuário" autocomplete="off" />
       <input id="pass" type="password" placeholder="senha" autocomplete="off" />
       <input id="car" placeholder="id do carro (ex.: demo)" value="demo" autocomplete="off" />
